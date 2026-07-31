@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRD-CLINIC-001 — AI Clinic Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --harbor: #16333D;
+    --harbor-tint: #DCEAE8;
+    --reef: #2F7A6E;
+    --reef-tint: #E4F2EF;
+    --clay: #B5502E;
+    --clay-tint: #F8E6DD;
+    --sage: #3F7D46;
+    --sage-tint: #E1EFE3;
+    --brick: #A83232;
+    --brick-tint: #F6DEDE;
+    --mist: #F4F7F6;
+    --border: #D6DEDC;
+    --ink: #1F2624;
+    --ink-secondary: #4E5957;
+    --white: #FFFFFF;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Public Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --radius: 10px;
+    --radius-card: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--mist);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar TOC */
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 2.5rem 1.25rem 2rem 1.5rem;
+    border-right: 1px solid var(--border);
+  }
+  nav.toc .toc-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--reef);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  nav.toc a {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 1px solid transparent;
+  }
+  nav.toc a:hover { color: var(--reef); }
+
+  main.content {
+    padding: 2.5rem 3rem 6rem;
+    max-width: 900px;
+  }
+
+  header.doc-header {
+    margin-bottom: 2.5rem;
+  }
+  header.doc-header .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--reef);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  header.doc-header h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--harbor);
+    margin: 0 0 14px;
+  }
+
+  table.meta {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13.5px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  table.meta td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  table.meta tr:last-child td { border-bottom: none; }
+  table.meta td:first-child { color: var(--ink-secondary); font-weight: 500; width: 220px; }
+
+  section { margin-bottom: 3rem; scroll-margin-top: 1.5rem; }
+
+  section > h2 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--harbor);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 1.25rem;
+  }
+  section h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--harbor);
+    margin: 1.75rem 0 0.75rem;
+  }
+  section h3:first-of-type { margin-top: 0; }
+
+  p { color: var(--ink); font-size: 14.5px; }
+  p.note { color: var(--ink-secondary); font-size: 13.5px; }
+
+  code, .id { font-family: var(--font-mono); font-size: 12.5px; background: var(--reef-tint); color: var(--reef); padding: 2px 6px; border-radius: 4px; }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  table.data th, table.data td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data th {
+    background: var(--mist);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--ink-secondary);
+    font-weight: 600;
+  }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--reef); white-space: nowrap; }
+
+  .priority { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .priority-M { background: var(--brick-tint); color: var(--brick); }
+  .priority-S { background: var(--clay-tint); color: var(--clay); }
+  .priority-C { background: var(--mist); color: var(--ink-secondary); border: 1px solid var(--border); }
+
+  .callout {
+    background: var(--reef-tint);
+    border-left: 3px solid var(--reef);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--harbor);
+    margin: 1rem 0;
+  }
+
+  /* Design system section */
+  .swatch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .swatch { border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--border); background: var(--white); }
+  .swatch-color { height: 56px; }
+  .swatch-meta { padding: 10px 12px; }
+  .swatch-meta .name { font-weight: 600; font-size: 13px; }
+  .swatch-meta .hex { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-secondary); margin-top: 2px; }
+  .swatch-meta .use { font-size: 12px; color: var(--ink-secondary); margin-top: 6px; line-height: 1.5; }
+
+  .type-sample { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 1.25rem; margin-bottom: 12px; }
+  .type-sample .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .type-h1-sample { font-family: var(--font-display); font-weight: 500; font-size: 28px; color: var(--harbor); margin: 0; }
+  .type-body-sample { font-family: var(--font-body); font-size: 14px; color: var(--ink); margin: 0; }
+
+  .btn-demo { font-family: var(--font-body); font-weight: 500; font-size: 13px; padding: 8px 16px; border-radius: var(--radius); border: none; margin-right: 8px; }
+  .btn-primary-demo { background: var(--reef); color: var(--white); }
+  .btn-secondary-demo { background: var(--white); color: var(--harbor); border: 1px solid var(--border); }
+  .badge-demo { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-right: 6px; }
+  .badge-success-demo { background: var(--sage); color: var(--white); }
+  .badge-danger-demo { background: var(--brick); color: var(--white); }
+
+  footer { color: var(--ink-secondary); font-size: 12px; text-align: center; padding-top: 2rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    main.content { padding: 2rem 1.25rem 4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <div class="toc-label">TRD-CLINIC-001</div>
+    <a href="#document-control">Document control</a>
+    <a href="#purpose">1. Purpose</a>
+    <a href="#system-overview">2. System overview</a>
+    <a href="#actors">3. Actors / roles</a>
+    <a href="#functional">4. Functional requirements</a>
+    <a href="#nonfunctional">5. Non-functional requirements</a>
+    <a href="#features">6. Feature list</a>
+    <a href="#data">7. Data requirements</a>
+    <a href="#api">8. API surface</a>
+    <a href="#acceptance">9. Sample acceptance criteria</a>
+    <a href="#outofscope">10. Out of scope</a>
+    <a href="#traceability">11. Traceability matrix</a>
+    <a href="#design-system">12. Design system</a>
+    <a href="#conventions">13. ID convention</a>
+  </nav>
+
+  <main class="content">
+
+    <header class="doc-header" id="document-control">
+      <div class="eyebrow">Technical Requirements Document</div>
+      <h1>AI Clinic Platform — Phase 0–1</h1>
+      <table class="meta">
+        <tr><td>Document ID</td><td>TRD-CLINIC-001</td></tr>
+        <tr><td>Version</td><td>1.4 — locks in Neon Postgres, Prisma, Upstash Redis</td></tr>
+        <tr><td>Status</td><td>Draft</td></tr>
+        <tr><td>Scope</td><td>Phase 0 (MVP) + Phase 1 (multi-agent, real users)</td></tr>
+        <tr><td>Out of scope</td><td>Billing, Insurance, Medical Records, Queue, Analytics, Marketing/Follow-up agents, WhatsApp/Voice, multi-tenant — see §10</td></tr>
+      </table>
+    </header>
+
+    <section id="purpose">
+      <h2>1. Purpose</h2>
+      <p>This TRD defines the functional and non-functional requirements for the AI Clinic Platform's initial buildable scope: patient booking via a conversational Receptionist Agent, doctor/admin management surfaces, and the supporting auth, notification, and audit systems. Every requirement carries an ID intended for direct reference in code comments, commit messages, and PR descriptions — e.g. <code>// Implements FR-APT-003</code>.</p>
+    </section>
+
+    <section id="system-overview">
+      <h2>2. System overview</h2>
+      <p>Two deployables: <code>apps/web</code> (Next.js — UI, auth, business logic) and <code>apps/agent-service</code> (Node.js — LangChain.js/LangGraph.js agents on Gemini). Full architectural detail lives in the companion Architecture Analysis Report and Folder Structure Guide; this TRD assumes that structure and does not repeat it.</p>
+      <div class="callout"><strong>Confirmed technology decision:</strong> database is <strong>PostgreSQL</strong>, not MongoDB. This was already the working assumption throughout this TRD (§7 data model is relational, FR-APT-002's double-booking prevention relies on a relational unique constraint, and shared agent memory uses the <code>pgvector</code> extension on the same database rather than a separate vector store — see Architecture Analysis Report §5). One database system to run, not two.</div>
+
+      <table class="data">
+        <tr><th>Layer</th><th>Choice</th><th>Notes</th></tr>
+        <tr><td>Database</td><td>PostgreSQL on Neon</td><td>Serverless, free tier, native <code>pgvector</code> support for FR-AGT-006</td></tr>
+        <tr><td>ORM</td><td>Prisma</td><td>Schema in §7 is written against this — see next deliverable below</td></tr>
+        <tr><td>Session / conversation memory</td><td>Upstash Redis</td><td>Free tier, serverless-friendly — backs FR-AGT-005 and FR-AUTH-005</td></tr>
+      </table>
+    </section>
+
+    <section id="actors">
+      <h2>3. Actors / user roles</h2>
+      <table class="data">
+        <tr><th>Role ID</th><th>Role</th><th>Description</th></tr>
+        <tr><td>ROLE-PATIENT</td><td>Patient</td><td>Books appointments, converses with the Receptionist Agent, views own appointment history</td></tr>
+        <tr><td>ROLE-DOCTOR</td><td>Doctor</td><td>Manages own availability, views own schedule</td></tr>
+        <tr><td>ROLE-ADMIN</td><td>Admin</td><td>Manages doctors, views all appointments, has audit log access</td></tr>
+        <tr><td>ROLE-AGENT</td><td>AI Agent (system actor)</td><td>Non-human actor acting on behalf of a patient within defined tool permissions</td></tr>
+      </table>
+    </section>
+
+    <section id="functional">
+      <h2>4. Functional requirements</h2>
+      <p class="note">Priority: <span class="priority priority-M">M</span> Must have (Phase 0 blocker) &nbsp; <span class="priority priority-S">S</span> Should have &nbsp; <span class="priority priority-C">C</span> Could have (deferrable)</p>
+
+      <h3>4.1 Authentication &amp; authorization — FR-AUTH</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-AUTH-001</td><td>The system shall allow a patient to register using email + password.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUTH-002</td><td>The system shall allow login via email/password session (NextAuth.js credentials provider).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUTH-003</td><td>The system shall assign exactly one role (ROLE-PATIENT, ROLE-DOCTOR, ROLE-ADMIN) to each account at creation.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUTH-004</td><td>The system shall restrict route access by role at the layout level.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUTH-005</td><td>The system shall expire sessions after 24 hours of inactivity.</td><td><span class="priority priority-S">S</span></td><td>0</td></tr>
+        <tr><td>FR-AUTH-006</td><td>The system shall allow password reset via emailed one-time link.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-AUTH-007</td><td>The system shall rate-limit login attempts to 5 per 15 minutes per account.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+      </table>
+      <div class="callout">Acceptance (FR-AUTH-004): a patient account visiting <code>/admin/*</code> receives a 403 and redirect to <code>/dashboard</code>, not a silent render of admin data.</div>
+
+      <h3>4.2 Patient management — FR-PAT</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-PAT-001</td><td>The system shall let a patient create/edit their profile (name, DOB, phone, preferred language).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-PAT-002</td><td>The system shall let a patient view their own upcoming and past appointments.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-PAT-003</td><td>The system shall prevent a patient from viewing another patient's profile or appointments via any API route.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-PAT-004</td><td>The system shall let a patient cancel their own upcoming appointment up to 2 hours before start time.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+      </table>
+
+      <h3>4.3 Doctor management — FR-DOC</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-DOC-001</td><td>The system shall let an admin create a doctor profile (name, specialty, bio).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-DOC-002</td><td>The system shall let a doctor define recurring weekly availability windows.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-DOC-003</td><td>The system shall let a doctor mark specific dates as unavailable (holiday/leave override).</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-DOC-004</td><td>The system shall expose doctor availability to the agent service via an internal, read-only API.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-DOC-005</td><td>The system shall let a doctor view their own upcoming schedule in a calendar view.</td><td><span class="priority priority-S">S</span></td><td>0</td></tr>
+      </table>
+
+      <h3>4.4 Appointment management — FR-APT</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-APT-001</td><td>The system shall create an appointment record only through <code>appointment.service.ts</code> (single write path).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-APT-002</td><td>The system shall prevent double-booking of a doctor's time slot at the database constraint level, not application logic alone.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-APT-003</td><td>The system shall emit an <code>AppointmentCreated</code> event on successful booking.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-APT-004</td><td>The system shall emit an <code>AppointmentCancelled</code> event on cancellation.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-APT-005</td><td>The system shall allow appointment booking exclusively through the Receptionist Agent conversational flow in Phase 0.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-APT-006</td><td>The system shall allow direct manual booking via UI form as a fallback path once the Scheduling Agent exists.</td><td><span class="priority priority-C">C</span></td><td>1</td></tr>
+      </table>
+      <div class="callout">Acceptance (FR-APT-002): two simultaneous booking attempts for the same doctor/slot resolve to exactly one confirmed appointment and one rejected attempt with a clear reason returned to the caller.</div>
+
+      <h3>4.5 Notification — FR-NOT</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-NOT-001</td><td>The system shall send an email confirmation on <code>AppointmentCreated</code>.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-NOT-002</td><td>The system shall send an email reminder 24 hours before an appointment.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-NOT-003</td><td>The system shall log every notification attempt (sent/failed) with timestamp.</td><td><span class="priority priority-S">S</span></td><td>0</td></tr>
+        <tr><td>FR-NOT-004</td><td>The system shall support WhatsApp as an additional channel.</td><td><span class="priority priority-C">C</span></td><td>Out of scope (Phase 2)</td></tr>
+      </table>
+
+      <h3>4.6 Receptionist Agent — FR-AGT</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-AGT-001</td><td>The agent shall accept free-text patient input describing a desired appointment (doctor, specialty, or symptom-based).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-002</td><td>The agent shall retrieve real-time doctor availability via <code>getDoctorAvailability.tool.ts</code> before proposing a slot.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-003</td><td>The agent shall never write to any database directly — all state changes occur through tool calls to <code>apps/web</code> APIs.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-004</td><td>The agent shall confirm the proposed appointment with the patient before calling <code>bookAppointment.tool.ts</code>.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-005</td><td>The agent shall retain conversation context for the duration of an active session (Redis-backed).</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-006</td><td>The agent shall answer clinic FAQ/policy questions using retrieval over pgvector-stored clinic policy documents.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-AGT-007</td><td>The agent shall decline to answer clinical/medical questions outside booking/FAQ scope and redirect the patient to a human.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AGT-008</td><td>The agent shall log every tool call and decision to the audit log before returning a response to the patient.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+      </table>
+      <div class="callout">Acceptance (FR-AGT-007): given input "what medication should I take for X", the agent responds with a redirect message and does not attempt to answer clinically, regardless of prompt phrasing or persistence.</div>
+
+      <h3>4.7 Scheduling Agent — FR-SCH (Phase 1)</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-SCH-001</td><td>The Scheduling Agent shall handle rescheduling requests for existing appointments.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-SCH-002</td><td>The Receptionist Agent shall hand off rescheduling intent to the Scheduling Agent via the LangGraph supervisor node.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-SCH-003</td><td>The Scheduling Agent shall re-check slot availability before confirming any reschedule.</td><td><span class="priority priority-M">M</span></td><td>1</td></tr>
+      </table>
+
+      <h3>4.8 Audit &amp; compliance — FR-AUD</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-AUD-001</td><td>The system shall persist an immutable audit record for every agent tool call: actor, input summary, tool name, output, timestamp.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUD-002</td><td>The system shall persist an audit record for every admin action affecting patient or doctor data.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+        <tr><td>FR-AUD-003</td><td>The system shall allow ROLE-ADMIN to query the audit log filtered by patient, doctor, or date range.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-AUD-004</td><td>Audit records shall not be deletable or editable through any application code path.</td><td><span class="priority priority-M">M</span></td><td>0</td></tr>
+      </table>
+
+      <h3>4.9 Payment — FR-PAY</h3>
+      <p class="note">Scope note: this is minimal consultation-fee collection at booking time, not the full Billing Service (invoicing, insurance claims, refund automation) from the original architecture doc — that remains deferred to Phase 2–3. Recommended method: <strong>Stripe Checkout</strong> — free to integrate (no setup fee, no monthly fee, pay only ~2.9% + 30¢ per successful transaction), ships a free sandbox/test mode, and uses a Stripe-hosted payment page so the platform never touches raw card data. If your target market is a region Stripe doesn't serve directly (e.g. Pakistan), swap in a local aggregator (PayFast, JazzCash, or EasyPaisa merchant API) behind the same <code>PaymentProvider</code> interface — the requirements below don't change either way.</p>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+        <tr><td>FR-PAY-001</td><td>The system shall collect a consultation fee from the patient at the point of booking confirmation, before the appointment is marked <code>confirmed</code>.</td><td><span class="priority priority-M">M</span></td><td>1</td></tr>
+        <tr><td>FR-PAY-002</td><td>The system shall redirect the patient to a hosted checkout page (Stripe Checkout or equivalent) rather than collecting card details on any first-party form.</td><td><span class="priority priority-M">M</span></td><td>1</td></tr>
+        <tr><td>FR-PAY-003</td><td>The system shall mark an appointment as <code>confirmed</code> only after receiving a successful payment webhook, not on client-side redirect alone.</td><td><span class="priority priority-M">M</span></td><td>1</td></tr>
+        <tr><td>FR-PAY-004</td><td>The system shall record every payment attempt (succeeded, failed, refunded) with amount, currency, and provider transaction ID.</td><td><span class="priority priority-M">M</span></td><td>1</td></tr>
+        <tr><td>FR-PAY-005</td><td>The system shall support a free "pay at clinic" fallback option alongside online payment, so a failed/unavailable payment integration never blocks booking entirely.</td><td><span class="priority priority-S">S</span></td><td>1</td></tr>
+        <tr><td>FR-PAY-006</td><td>The system shall allow an admin to issue a refund through the provider's API, logged the same way as any other payment event.</td><td><span class="priority priority-C">C</span></td><td>2</td></tr>
+      </table>
+      <div class="callout">Acceptance (FR-PAY-003): a patient who closes the browser tab immediately after paying, before the redirect completes, still ends up with a <code>confirmed</code> appointment — because confirmation is driven by the provider's server-to-server webhook, not the client returning to your site.</div>
+    </section>
+
+    <section id="nonfunctional">
+      <h2>5. Non-functional requirements</h2>
+
+      <h3>5.1 Security — NFR-SEC</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-SEC-001</td><td>All patient data shall be encrypted in transit (TLS 1.2+) for every network hop, including internal service-to-service calls.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-SEC-002</td><td>Passwords shall be hashed with bcrypt (cost factor ≥ 12), never stored or logged in plaintext.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-SEC-003</td><td>The <code>apps/agent-service</code> process shall not hold a database connection string or direct DB credentials under any configuration.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-SEC-004</td><td>All internal API calls between <code>apps/web</code> and <code>apps/agent-service</code> shall be authenticated via a shared service token.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-SEC-005</td><td>No real patient identifiers or medical details shall be transmitted to the Gemini free-tier API; synthetic data only until paid tier/Vertex AI is in place.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-SEC-006</td><td>The platform shall never store or process raw card numbers — all card data stays within the payment provider's hosted checkout (PCI SAQ-A scope only).</td><td><span class="priority priority-M">M</span></td></tr>
+      </table>
+
+      <h3>5.2 Performance — NFR-PERF</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-PERF-001</td><td>A booking confirmation shall be returned to the patient within 8 seconds under normal load.</td><td><span class="priority priority-S">S</span></td></tr>
+        <tr><td>NFR-PERF-002</td><td>The system shall queue and gracefully retry agent requests that hit Gemini rate limits (429), notifying the patient of a short delay.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-PERF-003</td><td>Doctor availability lookups shall respond within 500ms at the API layer.</td><td><span class="priority priority-S">S</span></td></tr>
+      </table>
+
+      <h3>5.3 Reliability — NFR-REL</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-REL-001</td><td>A failed notification send shall not roll back a successful appointment booking.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-REL-002</td><td>The event emitter shall not lose an <code>AppointmentCreated</code> event on a single subscriber failure.</td><td><span class="priority priority-S">S</span></td></tr>
+      </table>
+
+      <h3>5.4 Accessibility — NFR-A11Y</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-A11Y-001</td><td>All UI text/background color pairs shall meet WCAG AA contrast (4.5:1 for body text).</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-A11Y-002</td><td>Status shall never be communicated by color alone.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-A11Y-003</td><td>All interactive elements shall be keyboard-navigable with a visible focus state.</td><td><span class="priority priority-S">S</span></td></tr>
+      </table>
+
+      <h3>5.5 Scalability — NFR-SCALE</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-SCALE-001</td><td>Each business module in <code>apps/web/modules/*</code> shall be extractable into an independent service without changing its internal repository/service boundary.</td><td><span class="priority priority-S">S</span></td></tr>
+        <tr><td>NFR-SCALE-002</td><td>Each agent in <code>apps/agent-service/agents/*</code> shall be addable without modifying existing agent code.</td><td><span class="priority priority-M">M</span></td></tr>
+      </table>
+
+      <h3>5.6 Compliance &amp; data privacy — NFR-COMP</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-COMP-001</td><td>Every read/write of patient medical or contact data shall be traceable to an actor (human or agent) via the audit log.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-COMP-002</td><td>Data residency/regional hosting requirements shall be confirmed before any real (non-synthetic) patient data is stored.</td><td><span class="priority priority-M">M</span></td></tr>
+      </table>
+
+      <h3>5.7 Maintainability — NFR-MAINT</h3>
+      <table class="data">
+        <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+        <tr><td>NFR-MAINT-001</td><td>Each module shall expose exactly one repository file as its sole database access point.</td><td><span class="priority priority-M">M</span></td></tr>
+        <tr><td>NFR-MAINT-002</td><td>Commit messages and PR descriptions shall reference the requirement ID(s) they implement.</td><td><span class="priority priority-S">S</span></td></tr>
+      </table>
+    </section>
+
+    <section id="features">
+      <h2>6. Feature list (phase-mapped, traceable)</h2>
+      <table class="data">
+        <tr><th>Feature ID</th><th>Feature name</th><th>Phase</th><th>Implements</th></tr>
+        <tr><td>FEAT-001</td><td>Patient registration &amp; login</td><td>0</td><td>FR-AUTH-001, 002, 003</td></tr>
+        <tr><td>FEAT-002</td><td>Role-based dashboards</td><td>0</td><td>FR-AUTH-004</td></tr>
+        <tr><td>FEAT-003</td><td>Patient profile management</td><td>0</td><td>FR-PAT-001, 003</td></tr>
+        <tr><td>FEAT-004</td><td>Doctor profile &amp; availability management</td><td>0</td><td>FR-DOC-001, 002, 004</td></tr>
+        <tr><td>FEAT-005</td><td>Conversational appointment booking</td><td>0</td><td>FR-AGT-001–005, 007, 008, FR-APT-001–003, 005</td></tr>
+        <tr><td>FEAT-006</td><td>Email booking confirmation</td><td>0</td><td>FR-NOT-001, 003</td></tr>
+        <tr><td>FEAT-007</td><td>Agent audit log</td><td>0</td><td>FR-AUD-001, 004</td></tr>
+        <tr><td>FEAT-008</td><td>Clinic FAQ / policy Q&amp;A via agent</td><td>1</td><td>FR-AGT-006</td></tr>
+        <tr><td>FEAT-009</td><td>Appointment cancellation</td><td>1</td><td>FR-PAT-004, FR-APT-004</td></tr>
+        <tr><td>FEAT-010</td><td>Rescheduling via Scheduling Agent</td><td>1</td><td>FR-SCH-001–003</td></tr>
+        <tr><td>FEAT-011</td><td>Appointment reminders (24h)</td><td>1</td><td>FR-NOT-002</td></tr>
+        <tr><td>FEAT-012</td><td>Admin audit log search</td><td>1</td><td>FR-AUD-003</td></tr>
+        <tr><td>FEAT-013</td><td>Manual booking form (fallback)</td><td>1</td><td>FR-APT-006</td></tr>
+        <tr><td>FEAT-014</td><td>Password reset flow</td><td>1</td><td>FR-AUTH-006</td></tr>
+        <tr><td>FEAT-015</td><td>Consultation fee payment (Stripe Checkout)</td><td>1</td><td>FR-PAY-001–005, NFR-SEC-006</td></tr>
+      </table>
+    </section>
+
+    <section id="data">
+      <h2>7. Data requirements (entity overview)</h2>
+      <table class="data">
+        <tr><th>Entity</th><th>Owning module</th><th>Key fields (indicative)</th></tr>
+        <tr><td>Patient</td><td>modules/patient</td><td>id, name, dob, phone, email, preferredLanguage</td></tr>
+        <tr><td>Doctor</td><td>modules/doctor</td><td>id, name, specialty, bio</td></tr>
+        <tr><td>AvailabilityWindow</td><td>modules/doctor</td><td>id, doctorId, dayOfWeek, startTime, endTime</td></tr>
+        <tr><td>Appointment</td><td>modules/appointment</td><td>id, patientId, doctorId, startTime, endTime, status</td></tr>
+        <tr><td>AuditLog</td><td>lib/logger</td><td>id, actorType, actorId, action, targetEntity, targetId, timestamp</td></tr>
+        <tr><td>NotificationLog</td><td>modules/notification</td><td>id, appointmentId, channel, status, sentAt</td></tr>
+        <tr><td>Payment</td><td>modules/payment</td><td>id, appointmentId, provider, providerTxnId, amount, currency, status</td></tr>
+      </table>
+      <p class="note">A full Prisma schema is a natural next deliverable once this TRD is approved.</p>
+    </section>
+
+    <section id="api">
+      <h2>8. API surface (high-level, internal contracts)</h2>
+      <table class="data">
+        <tr><th>Endpoint</th><th>Method</th><th>Caller</th><th>Requirement(s)</th></tr>
+        <tr><td>/api/auth/[...nextauth]</td><td>POST</td><td>Browser</td><td>FR-AUTH-001, 002</td></tr>
+        <tr><td>/api/patients/me</td><td>GET / PATCH</td><td>Browser (patient)</td><td>FR-PAT-001</td></tr>
+        <tr><td>/api/doctors/:id/availability</td><td>GET</td><td>agent-service (internal)</td><td>FR-DOC-004, NFR-SEC-004</td></tr>
+        <tr><td>/api/appointments</td><td>POST</td><td>agent-service (internal)</td><td>FR-APT-001, 002, 003</td></tr>
+        <tr><td>/api/appointments/me</td><td>GET</td><td>Browser (patient)</td><td>FR-PAT-002</td></tr>
+        <tr><td>/api/agent-webhook</td><td>POST</td><td>agent-service → web</td><td>Event delivery for FR-APT-003</td></tr>
+        <tr><td>/api/audit-log</td><td>GET</td><td>Browser (admin)</td><td>FR-AUD-003</td></tr>
+        <tr><td>/api/payments/checkout-session</td><td>POST</td><td>Browser (patient)</td><td>FR-PAY-001, 002</td></tr>
+        <tr><td>/api/payments/webhook</td><td>POST</td><td>Payment provider (server-to-server)</td><td>FR-PAY-003, 004</td></tr>
+      </table>
+    </section>
+
+    <section id="acceptance">
+      <h2>9. Sample acceptance criteria (end-to-end)</h2>
+      <h3>FEAT-005 — Conversational appointment booking</h3>
+      <p>Given a logged-in patient with ROLE-PATIENT, when they message "I need to see a dermatologist this week," then the agent shall: retrieve dermatology-specialty doctors (FR-AGT-002) → propose an available slot → wait for explicit patient confirmation (FR-AGT-004) → call <code>bookAppointment.tool.ts</code> → receive a confirmed Appointment record → log the full exchange to the audit log (FR-AGT-008) → trigger <code>AppointmentCreated</code> → patient receives an email confirmation (FR-NOT-001) — and the doctor's calendar reflects the new appointment without a double-booking (FR-APT-002).</p>
+    </section>
+
+    <section id="outofscope">
+      <h2>10. Out of scope (Phase 2–3 — reference only)</h2>
+      <p>Full Billing Service (invoicing, multi-line receipts, insurance claims, automated refund workflows), Insurance Service + Insurance Agent, Medical Record Service + Doctor Copilot, Prescription Service, Queue Service + Queue Agent, Analytics Service + Analytics Agent, Search Service, Document Service, Marketing Agent, Follow-up Agent, WhatsApp/Voice interfaces, Public API, multi-tenant support. Rationale for each deferral is documented in the Architecture Analysis Report, §6.</p>
+      <p class="note">Minimal consultation-fee payment collection (FR-PAY-*, FEAT-015) is <em>not</em> deferred — it's now in Phase 1, scoped narrowly to "collect one fee via a hosted checkout page," distinct from the full Billing Service above.</p>
+      <div class="callout">Note on FR-APT-005: manual booking form is intentionally deferred to Phase 1 (FEAT-013) so Phase 0 forces every booking through the agent path — a deliberate scoping choice to prove the conversational flow works before adding a parallel path that could mask agent bugs.</div>
+    </section>
+
+    <section id="traceability">
+      <h2>11. Traceability matrix</h2>
+      <table class="data">
+        <tr><th>Module</th><th>Requirement groups</th></tr>
+        <tr><td>modules/auth</td><td>FR-AUTH-*, NFR-SEC-002</td></tr>
+        <tr><td>modules/patient</td><td>FR-PAT-*</td></tr>
+        <tr><td>modules/doctor</td><td>FR-DOC-*</td></tr>
+        <tr><td>modules/appointment</td><td>FR-APT-*, NFR-REL-001</td></tr>
+        <tr><td>modules/notification</td><td>FR-NOT-*, NFR-REL-001</td></tr>
+        <tr><td>agents/receptionist</td><td>FR-AGT-001–005, 007, 008</td></tr>
+        <tr><td>agents/scheduling</td><td>FR-SCH-*</td></tr>
+        <tr><td>memory/vectorMemory</td><td>FR-AGT-006</td></tr>
+        <tr><td>audit/auditLogger</td><td>FR-AUD-*, NFR-COMP-001</td></tr>
+        <tr><td>modules/payment</td><td>FR-PAY-*, NFR-SEC-006</td></tr>
+        <tr><td>Cross-cutting (all modules)</td><td>NFR-SEC-*, NFR-A11Y-*, NFR-MAINT-*</td></tr>
+      </table>
+    </section>
+
+    <section id="design-system">
+      <h2>12. Design system — colors &amp; typography</h2>
+      <p class="note">Referenced by NFR-A11Y-001–003. Solid fills only — no gradients, no drop shadows, anywhere in the product.</p>
+
+      <h3>Color palette</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-color" style="background:var(--harbor);"></div><div class="swatch-meta"><div class="name">Harbor</div><div class="hex">#16333D</div><div class="use">Primary text, headers, navigation.</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:var(--reef);"></div><div class="swatch-meta"><div class="name">Reef</div><div class="hex">#2F7A6E</div><div class="use">The one brand accent — buttons, links, active states.</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:var(--clay);"></div><div class="swatch-meta"><div class="name">Clay</div><div class="hex">#B5502E</div><div class="use">Human accent — the agent's presence in conversation.</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:var(--sage);"></div><div class="swatch-meta"><div class="name">Sage</div><div class="hex">#3F7D46</div><div class="use">Success/confirmed states only.</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:var(--brick);"></div><div class="swatch-meta"><div class="name">Brick</div><div class="hex">#A83232</div><div class="use">Alerts, cancellations, errors only.</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:var(--mist); border-bottom:1px solid var(--border);"></div><div class="swatch-meta"><div class="name">Mist</div><div class="hex">#F4F7F6</div><div class="use">Page background.</div></div></div>
+      </div>
+
+      <h3>Typography</h3>
+      <div class="type-sample">
+        <div class="label">Display — Fraunces, used with restraint</div>
+        <p class="type-h1-sample">Book with your doctor, in one message</p>
+      </div>
+      <div class="type-sample">
+        <div class="label">Body — Public Sans, all product UI</div>
+        <p class="type-body-sample">Public Sans carries every dashboard, form, and message in the product — built for legibility across a wide range of readers.</p>
+      </div>
+      <div class="type-sample">
+        <div class="label">Mono — IBM Plex Mono, identifiers only</div>
+        <p><code>APT-2481</code> &nbsp; <code>2026-07-30 10:30</code></p>
+      </div>
+
+      <h3>Component tokens (quick reference)</h3>
+      <table class="data">
+        <tr><th>Token</th><th>Value</th><th>Use</th></tr>
+        <tr><td>--radius</td><td>10px</td><td>Buttons, inputs, badges</td></tr>
+        <tr><td>--radius-card</td><td>12px</td><td>Cards, panels</td></tr>
+        <tr><td>Border</td><td>1px solid #D6DEDC</td><td>Default hairline on all cards/inputs</td></tr>
+        <tr><td>Shadow</td><td>none</td><td>Flat surfaces only</td></tr>
+        <tr><td>Body contrast</td><td>Ink #1F2624 on Mist #F4F7F6</td><td>12.8:1 — passes WCAG AAA (NFR-A11Y-001)</td></tr>
+      </table>
+
+      <h3>Component preview</h3>
+      <p>
+        <button class="btn-demo btn-primary-demo">Book appointment</button>
+        <button class="btn-demo btn-secondary-demo">View details</button>
+      </p>
+      <p>
+        <span class="badge-demo badge-success-demo">Confirmed</span>
+        <span class="badge-demo badge-danger-demo">Cancelled</span>
+      </p>
+      <p class="note">Full component library (form fields, chat bubbles, appointment cards) lives in the companion Style Guide file.</p>
+    </section>
+
+    <section id="conventions">
+      <h2>13. ID convention reference</h2>
+      <table class="data">
+        <tr><th>Prefix</th><th>Meaning</th></tr>
+        <tr><td>FR-&lt;MODULE&gt;-NNN</td><td>Functional requirement</td></tr>
+        <tr><td>NFR-&lt;CATEGORY&gt;-NNN</td><td>Non-functional requirement</td></tr>
+        <tr><td>FEAT-NNN</td><td>Feature (phase-scoped, maps to 1+ requirements)</td></tr>
+        <tr><td>ROLE-&lt;NAME&gt;</td><td>Actor/role</td></tr>
+      </table>
+      <p class="note">Use these IDs verbatim in code comments, commit messages, and PR titles.</p>
+    </section>
+
+    <footer>TRD-CLINIC-001 v1.4 · AI Clinic Platform · Phase 0–1</footer>
+
+  </main>
+</div>
+</body>
+</html>
