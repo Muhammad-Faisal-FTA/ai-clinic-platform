@@ -1,0 +1,157 @@
+// File: prisma/schema.prisma
+// Sprint: 2 — adds PasswordResetToken for FR-AUTH-006
+// Implements: TRD-CLINIC-001 §7 (data model)
+//
+// NOTE before "prisma db push": the vector extension must exist on
+// Neon first. Run this once in Neon's SQL editor:
+//   CREATE EXTENSION IF NOT EXISTS vector;
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector] // enables pgvector for FR-AGT-006 (Sprint 3+)
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  patient     Patient?
+  doctor      Doctor?
+  resetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Patient {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  name              String
+  dob               DateTime?
+  phone             String?
+  preferredLanguage String    @default("en")
+
+  appointments Appointment[]
+
+  @@map("patients")
+}
+
+model Doctor {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  name      String
+  specialty String
+  bio       String?
+
+  availability AvailabilityWindow[]
+  appointments Appointment[]
+
+  @@map("doctors")
+}
+
+model AvailabilityWindow {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id])
+  dayOfWeek Int // 0 = Sunday .. 6 = Saturday
+  startTime String // "09:00"
+  endTime   String // "17:00"
+
+  @@map("availability_windows")
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  patientId String
+  patient   Patient           @relation(fields: [patientId], references: [id])
+  doctorId  String
+  doctor    Doctor            @relation(fields: [doctorId], references: [id])
+  startTime DateTime
+  endTime   DateTime
+  status    AppointmentStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  payment Payment?
+
+  // FR-APT-002: double-booking prevention enforced at the DB constraint level
+  @@unique([doctorId, startTime])
+  @@map("appointments")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  appointmentId String        @unique
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+  provider      String        @default("stripe")
+  providerTxnId String?
+  amount        Int // cents
+  currency      String        @default("usd")
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+
+  @@map("payments")
+}
+
+model NotificationLog {
+  id            String   @id @default(cuid())
+  appointmentId String
+  channel       String // "email" | "whatsapp"
+  status        String // "sent" | "failed"
+  sentAt        DateTime @default(now())
+
+  @@map("notification_logs")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorType    String // "human" | "agent"
+  actorId      String
+  action       String
+  targetEntity String
+  targetId     String
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// FR-AUTH-006: password reset via emailed one-time link
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique // SHA-256 hash of the token — raw token never stored
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+}

@@ -1,0 +1,33 @@
+/* app/globals.css */
+@import "tailwindcss";
+
+@theme {
+  /* Brand palette — TRD-CLINIC-001 §12 */
+  --color-harbor: #16333D;
+  --color-harbor-tint: #DCEAE8;
+  --color-reef: #2F7A6E;
+  --color-reef-tint: #E4F2EF;
+  --color-clay: #B5502E;
+  --color-clay-tint: #F8E6DD;
+  --color-sage: #3F7D46;
+  --color-brick: #A83232;
+  --color-mist: #F4F7F6;
+  --color-border: #D6DEDC;
+  --color-ink: #1F2624;
+  --color-ink-secondary: #4E5957;
+
+  /* Fonts — bound to the CSS variables from fonts.ts */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* Radius tokens */
+  --radius-md: 10px;
+  --radius-card: 12px;
+}
+
+body {
+  background-color: var(--color-mist);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
